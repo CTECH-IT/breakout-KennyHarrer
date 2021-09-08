@@ -10,6 +10,12 @@ TODO:
 
 
 Change Log:
+    V 0.2.1
+    - Continued work on game classes
+    - realized get functions in classes are useless in this case
+    - added speed to player
+    - added ball offset direction
+    - 
     V 0.2
     - Added Game object
     - Started classes player, and ball

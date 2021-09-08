@@ -17,48 +17,59 @@ var Game = {
 
 function InitializeGame(){
     Game.State = Game.States.TITLE
-    Game.Player = new Player()
+    Game.Player = new Player(0,30,5)
     Game.Ball = new Ball()
     Game.Squares = [] // TODO: FIND POSITIONS FOR SQUARES
 }
 
 class Player{
-    constructor(x,length,color){
-        this.xCoord = x
-        this.platformLength = length
+    constructor(x,length,speed,color){
+        this.x = x
+        this.length = length
+        this.speed = speed
         this.color = color!=undefined?color:"#ffffff"// if color is undefined use white
     }
-    get X(){
-        return this.xCoord
-    }
-    get length(){
-        return this.platformLength
-    }
     setLength(length){
-        this.platformLength = length
+        this.length = length
     }
     setColor(color){
         this.color = color!=undefined?color:"#ffffff"// if color is undefined use white
     }
-
-    
+    setX(x){
+        this.x = x
+    }
+    setSpeed(speed){
+        this.speed = speed
+    }
 }
 class Ball{
-    constructor(){
-
+    constructor(vec2Position,vec2DirectionOffset,size,speed,color){
+        this.pos = vec2Position
+        this.directionOffset = vec2DirectionOffset
+        this.size = size
+        this.speed = speed
+        this.color = color 
+    }
+    setPos(pos){
+        this.pos = pos
+    }
+    setSize(size){
+        this.size = size
+    }
+    setOffset(offset){
+        this.directionOffset = offset
+    }
+    setspeed(speed){
+        this.speed = speed
+    }
+    setColor(color){
+        this.col = color!=undefined?color:"#ffffff"// if color is undefined use white
     }
 }
-
 class vec2{
     constructor(x,y){
-        this.xCoord = x
-        this.yCoord = y
-    }
-    get x(){
-        return this.xCoord
-    }
-    get y(){
-        return this.yCoord
+        this.x = x
+        this.y = y
     }
 }
 class square{
