@@ -98,7 +98,7 @@ class Ball{
     }
     getBounds(){
         const squareSize = (this.size*1.4)*1.3141592653589793
-        const one = new vec2(this.pos.x+(squareSize/2),this.pos.y+(squareSize/2))
+        const one = new vec2(this.pos.x-(squareSize/2),this.pos.y-(squareSize/2))
         const two = new vec2(one.x+squareSize,one.y+squareSize)
         return [one,two]
     }
@@ -230,8 +230,6 @@ function posWithinBounds(pos,bounds){
 }
 function BoundsWithinBounds(boundsA,boundsB){
 
-
-
     const AXmax = Math.max(boundsA[0].x,boundsA[1].x)
     const AYmax = Math.max(boundsA[0].y,boundsA[1].y)
     const AXmin = Math.min(boundsA[0].x,boundsA[1].x)
@@ -242,8 +240,22 @@ function BoundsWithinBounds(boundsA,boundsB){
     const BXmin = Math.min(boundsB[0].x,boundsB[1].x)
     const BYmin = Math.min(boundsB[0].y,boundsB[1].y)
 
-    var APositions = [AXmax,AYmax,AXmin,AYmin]
-    var BPositions = [BXmax,BYmax,BXmin,BYmin]
+    var APositions = [new vec2(AXmin,AYmin), new vec2(AXmin,AYmax), new vec2(AXmax,AYmin), new vec2(AXmax,AYmax)]
+    var BPositions = [new vec2(BXmin,BYmin), new vec2(BXmin,BYmax), new vec2(BXmax,BYmin), new vec2(BXmax,BYmax)]
+
+    for(p of APositions){
+        if (p.x > BXmin && p.x < BXmax && p.y > BYmin && p.y < BYmax) {
+            return true
+        }
+    }
+
+    for(p of BPositions){
+        if (p.x > AXmin && p.x < AXmax && p.y > AYmin && p.y < AYmax) {
+            return true
+        }
+    }
+
+    return false
 
 }
 
@@ -254,17 +266,18 @@ function ballCollisonCheck(){
     if(!Game.Tiles) return
     const offset = Game.Ball.directionOffset
     const p = Game.Ball.pos
+    const pBounds = Game.Ball.getBounds()
     for(i=0;i<Game.Tiles.length;i++){
         const tile = Game.Tiles[i]
         const bounds = tile.getBounds()
-        if(posWithinBounds(p,bounds)){
+        if(BoundsWithinBounds(pBounds,bounds)){
             Game.Ball.directionOffset = new vec2(offset.x*-1,offset.y*-1)
             Game.Tiles = arrayRemoveValue(Game.Tiles, tile)
             break
         }
     }
 
-    if(posWithinBounds(p,Game.Paddle.getBounds())){
+    if(BoundsWithinBounds(pBounds,Game.Paddle.getBounds())){
         const PaddleCenter = Game.Paddle.getCenter()
         const speed = Game.Ball.speed
         const x = clamp((p.x-PaddleCenter.x)*(speed/10),-(speed),(speed))
@@ -323,14 +336,13 @@ function drawLoop(){
 
     const ball = Game.Ball
     new circle(ball.pos,ball.size,false,ball.color)
-    const bounds = ball.getBounds()
-    const size = bounds[0].x-bounds[1].x
-    new rect(bounds[0],size,size,false)
     const paddle = Game.Paddle
     new rect(paddle.pos,paddle.width,paddle.height,false,paddle.color)
 
     drawTiles()
 
 }
+
+
 
 InitializeGame()

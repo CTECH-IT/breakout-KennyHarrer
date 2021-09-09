@@ -10,6 +10,8 @@ TODO:
 
 
 Change Log:
+    V 0.4.1
+    - Fixed weird hitbox
     V 0.4
     - Removed a lot of useless set functions in classes
     - Moved Initilize to the bottom where it should be
