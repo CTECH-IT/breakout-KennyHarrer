@@ -1,6 +1,5 @@
 TODO:
     [] - ensure we are drawing inside the canvas
-    [] - game object
     [] - points
     [] - game over
     [] - sounds?
@@ -10,6 +9,13 @@ TODO:
 
 
 Change Log:
+    V 0.5
+    - Improved readability in gameLogicLoop
+    - Canvas now clears after loss/win
+    - Centered and changed game title
+    - Added "Press Start p2" font
+    - Added Next level function
+    - Added Point Logic
     V 0.4.1
     - Fixed weird hitbox on ball
     - Fixed getBounds() in ball class

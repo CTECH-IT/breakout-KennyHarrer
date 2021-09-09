@@ -39,6 +39,7 @@ var Game = {
     Ball:undefined,
     Tiles:undefined,
     Level: undefined,
+    Points: undefined,
     TileZone: 150,
 }
 
@@ -193,21 +194,47 @@ document.addEventListener('keyup', function(key){
     }
 })
 
+function resetBallVelPos(){
+    Game.Ball.pos = new vec2(30,240)
+    Game.Ball.directionOffset = new vec2(1,-1)
+}
+
+function resetPaddlePos(){
+
+    Game.Paddle.pos = new vec2(5,canvas.height-25)
+
+}
+
 function InitializeGame(){
     
     Game.State = Game.States.TITLE
     Game.Paddle = new Paddle(new vec2(5,canvas.height-25),100,15,5,"#e67e22")
     Game.Ball = new Ball(new vec2(30,240), new vec2(1,-1),10,1,"#e74c3c")
-    Game.Level = 5
+    Game.Level = 1
+    Game.Points = 0
     createTiles()
     //drawLoop()
     Game.Interval = setInterval(drawLoop,1/fps)
 }
 
+function winGame(){
+
+    clearInterval(Game.Interval)
+    ctx.clearRect(0,0,canvas.width,canvas.height)
+
+}
+
 function loseGame(){
 
     clearInterval(Game.Interval)
-    ctx.clearRect(0,0,canvas.width,canvas.height) //not clearing for some reason?
+    ctx.clearRect(0,0,canvas.width,canvas.height) 
+
+}
+
+function nextLevel(){
+
+    createTiles()
+    resetPaddlePos()
 
 }
 
@@ -273,6 +300,7 @@ function ballCollisonCheck(){
         if(BoundsWithinBounds(pBounds,bounds)){
             Game.Ball.directionOffset = new vec2(offset.x*-1,offset.y*-1)
             Game.Tiles = arrayRemoveValue(Game.Tiles, tile)
+            Game.Points += 1
             break
         }
     }
@@ -289,41 +317,69 @@ function ballCollisonCheck(){
 
 function gameLogicLoop() {
 
-    Game.Ball.pos.add(Game.Ball.directionOffset)
+    /*
+        Ball Logic
+    */
 
-    ballCollisonCheck()
+        Game.Ball.pos.add(Game.Ball.directionOffset)
 
-    //Bouncing off the walls!!
-    if(Game.Ball.pos.y < Game.Ball.size*2){ //top
-        const offset = Game.Ball.directionOffset
-        Game.Ball.directionOffset = new vec2(offset.x,offset.y*-1)
-    }
+        ballCollisonCheck()
 
-    if(Game.Ball.pos.x  < Game.Ball.size*2){ //left
-        const offset = Game.Ball.directionOffset
-        Game.Ball.directionOffset = new vec2(offset.x*-1,offset.y)
-    }
+        //Bouncing off the walls!!
+        if(Game.Ball.pos.y < Game.Ball.size*2){ //top
+            const offset = Game.Ball.directionOffset
+            Game.Ball.directionOffset = new vec2(offset.x,offset.y*-1)
+        }
 
-    if(Game.Ball.pos.x > canvas.width-(Game.Ball.size*2)){ //right
-        const offset = Game.Ball.directionOffset
-        Game.Ball.directionOffset = new vec2(offset.x*-1,offset.y)
-    }
+        if(Game.Ball.pos.x  < Game.Ball.size*2){ //left
+            const offset = Game.Ball.directionOffset
+            Game.Ball.directionOffset = new vec2(offset.x*-1,offset.y)
+        }
 
-    //Lose condition:
-    if(Game.Ball.pos.y > canvas.height-Game.Ball.size){
-        loseGame()
-        return
-    }
+        if(Game.Ball.pos.x > canvas.width-(Game.Ball.size*2)){ //right
+            const offset = Game.Ball.directionOffset
+            Game.Ball.directionOffset = new vec2(offset.x*-1,offset.y)
+        }
 
-    //Move paddle
+    /*
 
-    if(left && Game.Paddle.pos.x > 2){
-        Game.Paddle.pos.x += -1
-    }
-    
-    if(right && Game.Paddle.pos.x < canvas.width-1-Game.Paddle.width){
-        Game.Paddle.pos.x += 1
-    }
+        Progression, win, and lose logic
+
+    */
+
+        //Ball out of bounds, you win!
+        if(Game.Ball.pos.y > canvas.height-Game.Ball.size){
+            loseGame()
+            return true
+        }
+
+        if(Game.Tiles.length == 0){
+
+            if(Game.Level == 5){
+                //You win!
+                winGame()
+            }else{
+                //Next Level!
+                Game.Level += 1
+                resetBallVelPos()
+                nextLevel()
+            }
+
+        }
+
+    /*
+
+        Paddle movement logic
+
+    */
+
+        if(left && Game.Paddle.pos.x > 2){
+            Game.Paddle.pos.x += -1
+        }
+        
+        if(right && Game.Paddle.pos.x < canvas.width-1-Game.Paddle.width){
+            Game.Paddle.pos.x += 1
+        }
 
 }
 
@@ -332,7 +388,9 @@ function drawLoop(){
     ctx.clearRect(0,0,canvas.width,canvas.height) //clear canvas
 
 
-    gameLogicLoop()
+    if(gameLogicLoop()){
+        return //Stop updating graphics after loss/win
+    }
 
     const ball = Game.Ball
     new circle(ball.pos,ball.size,false,ball.color)
