@@ -10,6 +10,11 @@ TODO:
 
 
 Change Log:
+    V 0.4
+    - Removed a lot of useless set functions in classes
+    - Moved Initilize to the bottom where it should be
+    - Added getBounds to Ball Class
+    - Worked on bounds within bounds function
     V 0.3
     - Added "Level Up" Game state
     - Added Level Data
