@@ -14,24 +14,29 @@ var Game = {
     },
     Levels:{
         1:{ //IMPORTANT: TileSize must be divisible by 480
-            TileSize: 80,
-            Colors: [] //white
+            TileSize: 80, //80
+            Colors: [], //white
+            Speed: 1,
         },
         2:{
             TileSize: 60,
-            Colors: ["#4CBB17", "#006600", "#3FFF00", "#39FF14"] //green
+            Colors: ["#4CBB17", "#006600", "#3FFF00", "#39FF14"], //green
+            Speed: 1.1,
         },
         3:{
             TileSize: 40,
-            Colors: [] //yellow
+            Colors: ["#FFBF00", "#FFEA00", "#8B8000", "#DAA520"], //yellow
+            Speed: 1.5,
         },
         4:{
             TileSize: 30,
-            Colors: [] //red
+            Colors: ["#880808", "#EE4B2B", "#C41E3A", "#D2042D"], //red
+            Speed: 1.8
         },
         5:{
             TileSize: 20,
-            Colors: [true]//rainbow mode for the colors
+            Colors: [true],//rainbow mode for the colors
+            Speed: 2,
         }
     },
     State:undefined,
@@ -162,6 +167,23 @@ class circle{
         ctx.closePath()
     }
 }
+class Text{
+    constructor(vec2,text,size,font,fill,color){
+        ctx.beginPath();
+        ctx.font = `${size} "${font}", cursive`
+        ctx.textAlign = "center"
+        ctx.textBaseline = 'middle'
+        if(fill){
+            ctx.fillStyle = color!=undefined?color:"#ffffff"// if color is undefined use white
+            ctx.fillText(text,vec2.x,vec2.y)
+        }else{
+            ctx.lineWidth = 2
+            ctx.strokeStyle = color!=undefined?color:"#ffffff"// if color is undefined use white
+            ctx.strokeText(text,vec2.x,vec2.y)
+        }
+        ctx.closePath()   
+    }
+}
 
 function drawTiles(){
     for(tile of Game.Tiles){
@@ -211,6 +233,7 @@ function InitializeGame(){
     Game.Paddle = new Paddle(new vec2(5,canvas.height-25),100,15,5,"#e67e22")
     Game.Ball = new Ball(new vec2(30,240), new vec2(1,-1),10,1,"#e74c3c")
     Game.Level = 1
+    updateBallSpeed()
     Game.Points = 0
     createTiles()
     //drawLoop()
@@ -221,6 +244,9 @@ function winGame(){
 
     clearInterval(Game.Interval)
     ctx.clearRect(0,0,canvas.width,canvas.height)
+    new Text(new vec2(canvas.width/2,canvas.height/2),"You won!","50px", "caption",false,"#00FF00")
+    new Text(new vec2(canvas.width/2,canvas.height/1.5),"Points: "+Game.Points,"40px", "caption",false,"#00FF00")
+    //TODO: points
 
 }
 
@@ -228,14 +254,32 @@ function loseGame(){
 
     clearInterval(Game.Interval)
     ctx.clearRect(0,0,canvas.width,canvas.height) 
+    new Text(new vec2(canvas.width/2,canvas.height/2),"You lost!","50px", "caption",false,"#FF0000")
+    new Text(new vec2(canvas.width/2,canvas.height/1.5),"Points: "+Game.Points,"40px", "caption",false,"#FF0000")
 
+}
+
+function updateBallSpeed(){
+    Game.Ball.Speed = Game.Levels[Game.Level].Speed
+    Game.Ball.directionOffset = new vec2(Game.Ball.Speed,-Game.Ball.Speed)
 }
 
 function nextLevel(){
 
+    const secondsCountDownToLevelUp = 5
+
+    Game.State = Game.States.LEVELUP
+    Game.StateChangeTimer = fps*secondsCountDownToLevelUp
+
     createTiles()
     resetPaddlePos()
+    updateBallSpeed()
 
+}
+
+function nextLevelScreen(){
+    new Text(new vec2(canvas.width/2,canvas.height/2),"Changing Levels","50px", "caption",false,"#00FF00")
+    new Text(new vec2(canvas.width/2,canvas.height/1.5),"Points: "+Game.Points,"40px", "caption",false,"#00FF00")
 }
 
 function arrayRemoveValue(array, value){
@@ -307,8 +351,8 @@ function ballCollisonCheck(){
 
     if(BoundsWithinBounds(pBounds,Game.Paddle.getBounds())){
         const PaddleCenter = Game.Paddle.getCenter()
-        const speed = Game.Ball.speed
-        const x = clamp((p.x-PaddleCenter.x)*(speed/10),-(speed),(speed))
+        const speed = Game.Ball.Speed
+        const x = clamp(((p.x-PaddleCenter.x)/10)*(speed),-(speed),(speed))
         Game.Ball.directionOffset = new vec2
         (x,-speed)
     }
@@ -387,7 +431,15 @@ function drawLoop(){
     //!DO NOT REMOVE!
     ctx.clearRect(0,0,canvas.width,canvas.height) //clear canvas
 
-
+    if(Game.State == Game.States.LEVELUP){
+        Game.StateChangeTimer -= 1
+        if(Game.StateChangeTimer <= 0){
+            Game.State= Game.States.PLAYING
+        }else{
+            nextLevelScreen()
+            return
+        }
+    }
     if(gameLogicLoop()){
         return //Stop updating graphics after loss/win
     }
@@ -404,3 +456,4 @@ function drawLoop(){
 
 
 InitializeGame()
+//nextLevelScreen()

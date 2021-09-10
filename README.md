@@ -9,6 +9,13 @@ TODO:
 
 
 Change Log:
+    V 0.6
+    - Added text class
+    - Next level screen
+    - lose screen
+    - win screen
+    - ball speed increases each level
+    - added colors to the rest of the levels
     V 0.5
     - Improved readability in gameLogicLoop
     - Canvas now clears after loss/win
